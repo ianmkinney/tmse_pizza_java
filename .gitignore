@@ -1,0 +1,17 @@
+# JavaFX SDK (too large for git)
+javafx-sdk-*/
+
+# Build artifacts
+build/
+*.jar
+*.class
+
+# IDE files
+.DS_Store
+.idea/
+*.iml
+.vscode/
+
+# Runtime data
+data/
+*.log
