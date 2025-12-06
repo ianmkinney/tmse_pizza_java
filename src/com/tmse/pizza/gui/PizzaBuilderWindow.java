@@ -9,6 +9,7 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
+import javafx.scene.shape.Line;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -105,7 +106,11 @@ public class PizzaBuilderWindow {
                 rb.setSelected(true);
                 selectedSize = size;
             }
-            rb.setOnAction(e -> selectedSize = (PizzaSize) rb.getUserData());
+            rb.setOnAction(e -> {
+                selectedSize = (PizzaSize) rb.getUserData();
+                updatePizzaPreview();
+                updatePriceLabel();
+            });
             sizeBox.getChildren().add(rb);
         }
         vbox.getChildren().addAll(sizeLabel, sizeBox);
@@ -188,6 +193,7 @@ public class PizzaBuilderWindow {
                 }
                 toppingsLabel.setText("Toppings (multiple) - " + selectedToppings.size() + "/" + MAX_TOPPINGS + " selected");
                 updatePizzaPreview();
+                updatePriceLabel();
             });
             toppingCheckboxes.add(cb);
             toppingsGrid.add(cb, col, row);
@@ -212,7 +218,7 @@ public class PizzaBuilderWindow {
         addToCartButton.setStyle("-fx-background-color: #dc2626; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 12 24;");
         
         double totalPrice = calculatePrice();
-        Label priceLabel = new Label("$" + String.format("%.2f", totalPrice));
+        priceLabel = new Label("$" + String.format("%.2f", totalPrice));
         priceLabel.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #dc2626;");
 
         addToCartButton.setOnAction(e -> {
@@ -240,6 +246,7 @@ public class PizzaBuilderWindow {
             instructionsField.clear();
             toppingsLabel.setText("Toppings (multiple) - " + selectedToppings.size() + "/" + MAX_TOPPINGS + " selected");
             updatePizzaPreview();
+            updatePriceLabel();
         });
 
         HBox buttonBox = new HBox(20);
@@ -275,10 +282,11 @@ public class PizzaBuilderWindow {
     }
 
     private StackPane pizzaPreviewPane;
+    private Label priceLabel;
     
     private StackPane createPizzaPreview() {
         pizzaPreviewPane = new StackPane();
-        pizzaPreviewPane.setPrefSize(300, 300);
+        pizzaPreviewPane.setPrefSize(350, 350);
         updatePizzaPreview();
         return pizzaPreviewPane;
     }
@@ -287,6 +295,39 @@ public class PizzaBuilderWindow {
         if (pizzaPreviewPane == null) return;
         
         pizzaPreviewPane.getChildren().clear();
+
+        // Determine pizza size and number of slices based on selectedSize
+        double baseRadius;
+        double cheeseRadius;
+        int numSlices;
+        
+        switch (selectedSize) {
+            case PERSONAL:
+                baseRadius = 80;
+                cheeseRadius = 73;
+                numSlices = 4;
+                break;
+            case SMALL:
+                baseRadius = 100;
+                cheeseRadius = 92;
+                numSlices = 6;
+                break;
+            case MEDIUM:
+                baseRadius = 120;
+                cheeseRadius = 110;
+                numSlices = 8;
+                break;
+            case LARGE:
+                baseRadius = 140;
+                cheeseRadius = 128;
+                numSlices = 10;
+                break;
+            default:
+                baseRadius = 120;
+                cheeseRadius = 110;
+                numSlices = 8;
+                break;
+        }
 
         // Set sauce color based on selection
         Color sauceColor;
@@ -302,7 +343,7 @@ public class PizzaBuilderWindow {
             sauceStrokeColor = Color.rgb(185, 28, 28);
         }
 
-        Circle pizzaBase = new Circle(120);
+        Circle pizzaBase = new Circle(baseRadius);
         pizzaBase.setFill(sauceColor);
         pizzaBase.setStroke(sauceStrokeColor);
         pizzaBase.setStrokeWidth(3);
@@ -318,7 +359,7 @@ public class PizzaBuilderWindow {
             cheeseStrokeColor = Color.rgb(251, 191, 36);
         }
 
-        Circle cheese = new Circle(110);
+        Circle cheese = new Circle(cheeseRadius);
         cheese.setFill(cheeseColor);
         cheese.setStroke(cheeseStrokeColor);
         cheese.setStrokeWidth(2);
@@ -331,26 +372,26 @@ public class PizzaBuilderWindow {
         
         switch (selectedCrust) {
             case THIN_NINJA:
-                crustRadius = 125; // Thinner crust
+                crustRadius = baseRadius + 5; // Thinner crust
                 crustFillColor = Color.rgb(230, 140, 20); // Lighter brown
                 crustStrokeColor = Color.rgb(200, 100, 10);
                 crustStrokeWidth = 2;
                 break;
             case DEEP_DISH:
-                crustRadius = 140; // Thicker crust
+                crustRadius = baseRadius + 20; // Thicker crust
                 crustFillColor = Color.rgb(200, 100, 10); // Darker brown
                 crustStrokeColor = Color.rgb(150, 70, 5);
                 crustStrokeWidth = 4;
                 break;
             case OOZE_FILLED:
-                crustRadius = 135; // Slightly thicker for filled crust
+                crustRadius = baseRadius + 15; // Slightly thicker for filled crust
                 crustFillColor = Color.rgb(240, 180, 60); // Golden/yellowish for cheese-filled
                 crustStrokeColor = Color.rgb(217, 119, 6);
                 crustStrokeWidth = 3;
                 break;
             case HAND_TOSSED:
             default:
-                crustRadius = 130; // Regular thickness
+                crustRadius = baseRadius + 10; // Regular thickness
                 crustFillColor = Color.rgb(217, 119, 6);
                 crustStrokeColor = Color.rgb(180, 83, 9);
                 crustStrokeWidth = 3;
@@ -364,6 +405,21 @@ public class PizzaBuilderWindow {
 
         pizzaPreviewPane.getChildren().addAll(crust, pizzaBase, cheese);
 
+        // Add slice lines
+        double sliceAngle = 2 * Math.PI / numSlices;
+        for (int i = 0; i < numSlices; i++) {
+            double angle = i * sliceAngle;
+            double x1 = Math.cos(angle) * (cheeseRadius * 0.3);
+            double y1 = Math.sin(angle) * (cheeseRadius * 0.3);
+            double x2 = Math.cos(angle) * cheeseRadius;
+            double y2 = Math.sin(angle) * cheeseRadius;
+            
+            Line sliceLine = new Line(x1, y1, x2, y2);
+            sliceLine.setStroke(Color.rgb(100, 100, 100));
+            sliceLine.setStrokeWidth(2);
+            pizzaPreviewPane.getChildren().add(sliceLine);
+        }
+
         for (String toppingId : selectedToppings) {
             Topping topping = MenuData.getToppingById(toppingId);
             if (topping != null) {
@@ -374,7 +430,7 @@ public class PizzaBuilderWindow {
                 
                 for (int i = 0; i < count; i++) {
                     double angle = random.nextDouble() * 2 * Math.PI;
-                    double radius = 15 + random.nextDouble() * 75;
+                    double radius = (cheeseRadius * 0.2) + random.nextDouble() * (cheeseRadius * 0.7);
                     double x = Math.cos(angle) * radius;
                     double y = Math.sin(angle) * radius;
                     
@@ -426,6 +482,13 @@ public class PizzaBuilderWindow {
             }
         }
 
+    }
+
+    private void updatePriceLabel() {
+        if (priceLabel != null) {
+            double totalPrice = calculatePrice();
+            priceLabel.setText("$" + String.format("%.2f", totalPrice));
+        }
     }
 
     private double calculatePrice() {
