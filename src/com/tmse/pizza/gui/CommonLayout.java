@@ -75,7 +75,7 @@ public class CommonLayout {
             headerBox.getChildren().add(backButton);
         }
         
-        Label headerLabel = new Label("TMSE Pizza");
+        Label headerLabel = new Label("🛸🍕 TMSE Pizza");
         headerLabel.setStyle("-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: white;");
         headerBox.getChildren().add(headerLabel);
         

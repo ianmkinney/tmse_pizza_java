@@ -287,6 +287,7 @@ public class PizzaBuilderWindow {
     private StackPane createPizzaPreview() {
         pizzaPreviewPane = new StackPane();
         pizzaPreviewPane.setPrefSize(350, 350);
+        pizzaPreviewPane.setClip(null); // Ensure no clipping occurs
         updatePizzaPreview();
         return pizzaPreviewPane;
     }
@@ -405,21 +406,6 @@ public class PizzaBuilderWindow {
 
         pizzaPreviewPane.getChildren().addAll(crust, pizzaBase, cheese);
 
-        // Add slice lines
-        double sliceAngle = 2 * Math.PI / numSlices;
-        for (int i = 0; i < numSlices; i++) {
-            double angle = i * sliceAngle;
-            double x1 = Math.cos(angle) * (cheeseRadius * 0.3);
-            double y1 = Math.sin(angle) * (cheeseRadius * 0.3);
-            double x2 = Math.cos(angle) * cheeseRadius;
-            double y2 = Math.sin(angle) * cheeseRadius;
-            
-            Line sliceLine = new Line(x1, y1, x2, y2);
-            sliceLine.setStroke(Color.rgb(100, 100, 100));
-            sliceLine.setStrokeWidth(2);
-            pizzaPreviewPane.getChildren().add(sliceLine);
-        }
-
         for (String toppingId : selectedToppings) {
             Topping topping = MenuData.getToppingById(toppingId);
             if (topping != null) {
@@ -480,6 +466,30 @@ public class PizzaBuilderWindow {
                     }
                 }
             }
+        }
+
+        // Add slice lines - extend from center to full edge including crust stroke (added after toppings so they're visible on top)
+        // Calculate the absolute maximum radius: crust circle radius + full stroke width to reach the outer edge
+        // In JavaFX, stroke extends half inward and half outward, so outer edge is at radius + strokeWidth/2
+        // But we'll use a very generous calculation to ensure we definitely reach the edge
+        double lineStrokeWidth = 3.0;
+        // Calculate maximum possible radius: use the actual outer edge of the crust (radius + half stroke) + full line stroke + generous buffer
+        // This ensures the lines extend well beyond the visual edge of the pizza
+        double calculatedRadius = crustRadius + crustStrokeWidth + lineStrokeWidth + 10; // Very generous buffer to ensure lines reach edge
+        // Add 45% more length to make sure lines extend all the way to the edge
+        double fullEdgeRadius = calculatedRadius * 1.45;
+        double sliceAngle = 2 * Math.PI / numSlices;
+        for (int i = 0; i < numSlices; i++) {
+            double angle = i * sliceAngle;
+            double x1 = 0; // Start from center
+            double y1 = 0; // Start from center
+            double x2 = Math.cos(angle) * fullEdgeRadius; // Extend to full edge including stroke + 45% extra
+            double y2 = Math.sin(angle) * fullEdgeRadius; // Extend to full edge including stroke + 45% extra
+            
+            Line sliceLine = new Line(x1, y1, x2, y2);
+            sliceLine.setStroke(Color.rgb(60, 60, 60)); // Darker color for better visibility
+            sliceLine.setStrokeWidth(lineStrokeWidth); // Thicker line
+            pizzaPreviewPane.getChildren().add(sliceLine);
         }
 
     }
