@@ -62,6 +62,20 @@ RUN mkdir -p data
 # Set up Xvfb display
 ENV DISPLAY=:99
 
+# Create minimal Fluxbox config to avoid warnings
+# Fluxbox will create defaults if these don't exist, but we create them to silence warnings
+RUN mkdir -p /root/.fluxbox && \
+    echo "session.screen0.toolbar.onHead: 0" > /root/.fluxbox/init && \
+    echo "session.screen0.toolbar.placement: TopCenter" >> /root/.fluxbox/init && \
+    echo "session.screen0.toolbar.height: 0" >> /root/.fluxbox/init && \
+    echo "session.screen0.slit.placement: TopRight" >> /root/.fluxbox/init && \
+    echo "session.screen0.iconbar.mode: Workspace" >> /root/.fluxbox/init && \
+    echo "session.screen0.iconbar.alignment: Relative" >> /root/.fluxbox/init && \
+    echo "session.screen0.iconbar.iconWidth: 80" >> /root/.fluxbox/init && \
+    echo "session.screen0.iconbar.iconTextPadding: 10" >> /root/.fluxbox/init && \
+    echo "session.screen0.iconbar.usePixmap: true" >> /root/.fluxbox/init && \
+    chmod 644 /root/.fluxbox/init
+
 # Create startup script with VNC server
 RUN echo '#!/bin/bash\n\
 set -e\n\
@@ -73,8 +87,8 @@ XVFB_PID=$!\n\
 # Wait for Xvfb to be ready\n\
 sleep 2\n\
 \n\
-# Start window manager (Fluxbox)\n\
-DISPLAY=:99 fluxbox &\n\
+# Start window manager (Fluxbox) - redirect stderr to suppress config warnings\n\
+DISPLAY=:99 fluxbox 2>/dev/null &\n\
 \n\
 # Set VNC password (default: pizza123, change via VNC_PASSWORD env var)\n\
 VNC_PASSWORD=${VNC_PASSWORD:-pizza123}\n\
