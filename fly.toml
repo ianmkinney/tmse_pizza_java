@@ -33,7 +33,7 @@ primary_region = "iad"
 
   [[services.ports]]
     port = 5900
-    handlers = ["tcp"]
+    handlers = ["proxy_proto"]
     
   [[services.ports]]
     port = 6080
