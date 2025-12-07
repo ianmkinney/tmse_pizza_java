@@ -53,8 +53,9 @@ COPY --from=builder /app/javafx-sdk ./javafx-sdk
 # Copy JAR file
 COPY --from=builder /app/TMSE_Pizza.jar ./
 
-# Copy data directory (if it exists, create if not)
-COPY data/ ./data/
+# Create data directory (app will create files at runtime)
+# Note: We don't copy the data/ directory to avoid build errors if it's missing
+# The application will create the necessary data files when it runs
 RUN mkdir -p data
 
 # Set up Xvfb display
