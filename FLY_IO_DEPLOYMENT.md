@@ -64,6 +64,35 @@ cd /Users/macbaby/Desktop/pizza_project/pizza_project_final/java_version
 
 ### Step 3: Initialize Fly.io App (First Time Only)
 
+**If you get an error "launch manifest was created for a app, but this is a app":**
+
+This error occurs when there's a conflict with the existing `fly.toml`. Fix it by:
+
+**Option A: Delete and regenerate fly.toml**
+```bash
+# Backup existing config (optional)
+mv fly.toml fly.toml.backup
+
+# Let fly launch create a new one
+fly launch --no-deploy
+```
+
+**Option B: Use existing fly.toml and just deploy**
+```bash
+# Skip launch, just deploy directly
+fly deploy
+```
+
+**Option C: Create app manually, then deploy**
+```bash
+# Create app without launch
+fly apps create tmse-pizza
+
+# Deploy directly
+fly deploy
+```
+
+**Normal launch (if no errors):**
 ```bash
 fly launch
 ```
@@ -73,11 +102,6 @@ This command will:
 - Ask for an app name (or use the one in `fly.toml`)
 - Ask for a region (choose closest to you)
 - Create the app on Fly.io
-
-**Note**: If you already have a `fly.toml` file, you can skip this step or use:
-```bash
-fly apps create tmse-pizza
-```
 
 ### Step 4: Review Configuration
 
@@ -236,6 +260,37 @@ fly dashboard
 
 ## Troubleshooting
 
+### Launch Error: "launch manifest was created for a app, but this is a app"
+
+**Cause**: Conflict between existing `fly.toml` and what `fly launch` expects.
+
+**Solution 1** (Recommended):
+```bash
+# Delete the existing fly.toml
+rm fly.toml
+
+# Let fly launch create a fresh one
+fly launch --no-deploy
+
+# Then deploy
+fly deploy
+```
+
+**Solution 2**:
+```bash
+# Create app manually
+fly apps create tmse-pizza
+
+# Deploy directly (skip launch)
+fly deploy
+```
+
+**Solution 3**:
+```bash
+# Use --copy-config to regenerate
+fly launch --copy-config --no-deploy
+```
+
 ### Build Fails
 
 **Error**: "Cannot find JavaFX modules"
@@ -244,7 +299,7 @@ fly dashboard
 **Error**: "Out of memory"
 - **Solution**: Increase memory in `fly.toml`:
   ```toml
-  [[vm]]
+  [vm]
     memory_mb = 1024
   ```
 

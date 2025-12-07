@@ -1,8 +1,5 @@
-# Fly.io configuration for TMSE Pizza Application
-# Generated for JavaFX desktop application deployment
-
-app = "tmse-pizza"  # Change this to your preferred app name
-primary_region = "iad"  # Change to your preferred region (iad, ord, sjc, etc.)
+app = "tmse-pizza"
+primary_region = "iad"
 
 [build]
   dockerfile = "Dockerfile"
@@ -11,21 +8,7 @@ primary_region = "iad"  # Change to your preferred region (iad, ord, sjc, etc.)
   DISPLAY = ":99"
   JAVA_OPTS = "-Xmx512m"
 
-[http_service]
-  internal_port = 8080
-  force_https = true
-  auto_stop_machines = true
-  auto_start_machines = true
-  min_machines_running = 0
-  processes = ["app"]
-
-[[vm]]
+[vm]
   cpu_kind = "shared"
   cpus = 1
   memory_mb = 512
-
-# Note: This is a desktop GUI application
-# Fly.io is primarily for web services, so this deployment
-# will run the app in headless mode using Xvfb
-# To access the GUI, you would need to set up VNC or similar
-
