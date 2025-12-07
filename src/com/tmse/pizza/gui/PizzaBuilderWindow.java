@@ -18,10 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-/**
- * Pizza Builder Window
- * Pizza builder on the RIGHT side matching hand-drawn design
- */
+// Pizza builder window for customizing pizzas
 public class PizzaBuilderWindow {
     private Stage stage;
     private Order currentOrder;
@@ -69,7 +66,7 @@ public class PizzaBuilderWindow {
 
         root.setCenter(mainContent);
         
-        VBox footerBox = CommonLayout.createFooter();
+        VBox footerBox = CommonLayout.createFooter(stage, currentOrder, cartItems);
         root.setBottom(footerBox);
 
         Scene scene = new Scene(root);

@@ -1,8 +1,6 @@
 package com.tmse.pizza.models;
 
-/**
- * Represents a user account
- */
+// Represents a user account
 public class User {
     private String username;
     private String password;

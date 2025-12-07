@@ -2,9 +2,7 @@ package com.tmse.pizza.models;
 
 import java.util.List;
 
-/**
- * Admin class matching system design specification
- */
+// Admin class for admin users
 public class Admin {
     private String adminID;
     private String username;

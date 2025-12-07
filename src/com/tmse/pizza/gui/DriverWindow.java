@@ -20,10 +20,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * Driver Dashboard Window
- * Allows drivers to claim orders, view deliveries, and track tips
- */
+// Driver dashboard window for claiming orders, viewing deliveries, and tracking tips
 public class DriverWindow {
     private Stage stage;
     private User currentUser;
@@ -94,7 +91,7 @@ public class DriverWindow {
         root.setCenter(tabPane);
 
         // Footer
-        VBox footerBox = CommonLayout.createFooter();
+        VBox footerBox = CommonLayout.createFooter(stage, null, null);
         root.setBottom(footerBox);
 
         Scene scene = new Scene(root);

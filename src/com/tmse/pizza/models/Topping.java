@@ -1,8 +1,6 @@
 package com.tmse.pizza.models;
 
-/**
- * Represents a pizza topping
- */
+// Represents a pizza topping
 public class Topping {
     private String id;
     private String name;

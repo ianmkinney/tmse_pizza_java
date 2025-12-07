@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"name": "pizza_project",
+			"path": "../.."
+		},
+		{
+			"name": "hand drawn images",
+			"path": "../../../TMSE_Pizza/tmse_next_js/hand drawn images"
+		}
+	],
+	"settings": {}
+}

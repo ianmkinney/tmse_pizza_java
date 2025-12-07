@@ -2,9 +2,7 @@ package com.tmse.pizza.models;
 
 import java.util.Date;
 
-/**
- * Receipt class matching system design specification
- */
+// Receipt class for order receipts
 public class Receipt {
     private String receiptID;
     private String orderID;

@@ -1,8 +1,6 @@
 package com.tmse.pizza.models;
 
-/**
- * Represents a beverage item
- */
+// Represents a beverage item
 public class Beverage {
     private String id;
     private String name;

@@ -2,9 +2,7 @@ package com.tmse.pizza.models;
 
 import java.util.Date;
 
-/**
- * Logs class for system activity logs
- */
+// Logs class for system activity logs
 public class Logs {
     private String logID;
     private String action;

@@ -13,9 +13,7 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 
-/**
- * Login window for user authentication
- */
+// Login window for user authentication
 public class LoginWindow {
     private Stage stage;
     private User currentUser;
@@ -109,7 +107,7 @@ public class LoginWindow {
         
         root.setCenter(centerBox);
         
-        VBox footerBox = CommonLayout.createFooter();
+        VBox footerBox = CommonLayout.createFooter(stage, null, null);
         root.setBottom(footerBox);
 
         Scene scene = new Scene(root);

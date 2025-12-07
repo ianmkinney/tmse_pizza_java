@@ -1,8 +1,6 @@
 package com.tmse.pizza.models;
 
-/**
- * MenuItem class matching system design specification
- */
+// MenuItem class for menu items
 public class MenuItem {
     private String itemID;
     private String name;

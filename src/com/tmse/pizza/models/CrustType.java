@@ -1,8 +1,6 @@
 package com.tmse.pizza.models;
 
-/**
- * Crust type enumeration
- */
+// Crust type enumeration
 public enum CrustType {
     HAND_TOSSED("Hand-Tossed"),
     THIN_NINJA("Thin Ninja Style"),

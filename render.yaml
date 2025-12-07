@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: tmse-pizza-java
+    env: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: free
+    region: oregon
+    healthCheckPath: /
+    envVars:
+      - key: DISPLAY
+        value: :99
+      - key: JAVA_OPTS
+        value: -Xmx384m
+      - key: VNC_PASSWORD
+        generateValue: true
+        sync: false
+    buildCommand: ""
+    startCommand: /app/start.sh
+    dockerCommand: ""
+    # Render free tier provides 512MB RAM, which is sufficient
+    # For better performance, upgrade to starter plan ($7/month)
+    scaling:
+      minInstances: 1
+      maxInstances: 1
+

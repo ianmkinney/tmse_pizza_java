@@ -12,9 +12,7 @@ import javafx.stage.Stage;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Main menu window for ordering pizzas and beverages
- */
+// Main menu window for ordering pizzas and beverages
 public class MenuWindow {
     private Stage stage;
     private User currentUser;
@@ -66,7 +64,7 @@ public class MenuWindow {
         VBox cartBox = createCartPanel();
         root.setRight(cartBox);
         
-        VBox footerBox = CommonLayout.createFooter();
+        VBox footerBox = CommonLayout.createFooter(stage, currentOrder, cartItems);
         root.setBottom(footerBox);
 
         Scene scene = new Scene(root);

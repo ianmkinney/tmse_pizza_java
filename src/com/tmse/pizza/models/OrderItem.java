@@ -2,9 +2,7 @@ package com.tmse.pizza.models;
 
 import java.util.List;
 
-/**
- * Represents an item in an order
- */
+// Represents an item in an order
 public class OrderItem {
     private String type;
     private String name;

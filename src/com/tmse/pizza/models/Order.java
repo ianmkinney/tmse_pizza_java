@@ -4,9 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-/**
- * Order class matching system design specification
- */
+// Order class for managing customer orders
 public class Order {
     private String orderID;
     private String customerID;

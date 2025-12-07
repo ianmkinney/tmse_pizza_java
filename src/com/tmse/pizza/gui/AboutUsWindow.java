@@ -15,9 +15,7 @@ import javafx.stage.Stage;
 
 import java.util.List;
 
-/**
- * About Us page matching hand-drawn design
- */
+// About Us page
 public class AboutUsWindow {
     private Stage stage;
     private Order currentOrder;
@@ -121,7 +119,7 @@ public class AboutUsWindow {
         scrollPane.setFitToWidth(true);
         root.setCenter(scrollPane);
 
-        VBox footerBox = CommonLayout.createFooter();
+        VBox footerBox = CommonLayout.createFooter(stage, currentOrder, cartItems);
         root.setBottom(footerBox);
 
         Scene scene = new Scene(root);

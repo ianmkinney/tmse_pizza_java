@@ -14,9 +14,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Order display window showing order details and totals
- */
+// Order display window showing order details and totals
 public class OrderDisplayWindow {
     private Stage stage;
     private Order order;
@@ -206,7 +204,7 @@ public class OrderDisplayWindow {
         }, "order");
         root.setTop(headerInfo.getHeaderContainer());
         
-        VBox footerBox = CommonLayout.createFooter();
+        VBox footerBox = CommonLayout.createFooter(stage, order, cartItems);
         root.setBottom(footerBox);
 
         Scene scene = new Scene(root);

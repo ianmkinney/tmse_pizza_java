@@ -2,9 +2,7 @@ package com.tmse.pizza.models;
 
 import java.util.List;
 
-/**
- * Customer class matching system design specification
- */
+// Customer class for customer information
 public class Customer {
     private String customerID;
     private String name;

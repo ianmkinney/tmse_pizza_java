@@ -4,7 +4,7 @@ Complete setup guide for the Java desktop application.
 
 ## Quick Start
 
-If you already have Java 17+ and JavaFX installed:
+If you already have Java 21+ and JavaFX installed:
 
 ```bash
 cd /Users/macbaby/Desktop/pizza_project/pizza_project_final/java_version
@@ -17,24 +17,24 @@ chmod +x build.sh
 
 ## Prerequisites
 
-### Step 1: Install Java JDK 17 or higher
+### Step 1: Install Java JDK 21 or higher
 
 **macOS (using Homebrew):**
 ```bash
-brew install openjdk@17
-echo 'export PATH="/opt/homebrew/opt/openjdk@17/bin:$PATH"' >> ~/.zshrc
-echo 'export JAVA_HOME="/opt/homebrew/opt/openjdk@17"' >> ~/.zshrc
+brew install openjdk@21
+echo 'export PATH="/opt/homebrew/opt/openjdk@21/bin:$PATH"' >> ~/.zshrc
+echo 'export JAVA_HOME="/opt/homebrew/opt/openjdk@21"' >> ~/.zshrc
 source ~/.zshrc
 ```
 
 **macOS (manual download):**
 1. Visit: https://adoptium.net/temurin/releases/
-2. Download JDK 17 for macOS (ARM64 for Apple Silicon, x64 for Intel)
+2. Download JDK 21 for macOS (ARM64 for Apple Silicon, x64 for Intel)
 3. Install the .pkg file
 
 **Windows:**
 1. Visit: https://adoptium.net/temurin/releases/
-2. Download JDK 17 for Windows
+2. Download JDK 21 for Windows
 3. Run the installer
 
 **Verify installation:**
@@ -45,22 +45,22 @@ javac -version
 
 ### Step 2: Download and Install JavaFX
 
-**Important:** JavaFX version must match your Java version (e.g., Java 17 needs JavaFX 17).
+**Important:** JavaFX version must match your Java version (e.g., Java 21 needs JavaFX 21).
 
 **macOS:**
 ```bash
 # Download from https://openjfx.io/
-# Select: Version 17, macOS, ARM64 (or x64 for Intel)
+# Select: Version 21, macOS, ARM64 (or x64 for Intel)
 # Then extract:
 cd ~/Downloads
-unzip openjfx-17.0.2_osx-aarch64_bin.zip  # Use x64 if Intel Mac
-mv javafx-sdk-17.0.2 ~/javafx-sdk-17
+unzip openjfx-21.0.2_osx-aarch64_bin.zip  # Use x64 if Intel Mac
+mv javafx-sdk-21.0.2 ~/javafx-sdk-21
 ```
 
 **Windows:**
 1. Visit: https://openjfx.io/
-2. Download JavaFX 17 for Windows
-3. Extract to `C:\javafx-sdk-17` or any location you prefer
+2. Download JavaFX 21 for Windows
+3. Extract to `C:\javafx-sdk-21` or any location you prefer
 
 ---
 
@@ -82,7 +82,7 @@ build.bat
 **Manual build (if scripts fail):**
 ```bash
 mkdir -p build
-javac -d build --module-path ~/javafx-sdk-17/lib --add-modules javafx.controls,javafx.fxml src/com/tmse/pizza/models/*.java src/com/tmse/pizza/storage/*.java src/com/tmse/pizza/gui/*.java src/com/tmse/pizza/*.java
+javac -d build --module-path ~/javafx-sdk-21/lib --add-modules javafx.controls,javafx.fxml src/com/tmse/pizza/models/*.java src/com/tmse/pizza/storage/*.java src/com/tmse/pizza/gui/*.java src/com/tmse/pizza/*.java
 jar cvfm TMSE_Pizza.jar MANIFEST.MF -C build .
 ```
 
@@ -103,10 +103,10 @@ java -jar TMSE_Pizza.jar
 **Option 3: Run with JavaFX module path:**
 ```bash
 # macOS/Linux:
-java --module-path ~/javafx-sdk-17/lib --add-modules javafx.controls,javafx.fxml -jar TMSE_Pizza.jar
+java --module-path ~/javafx-sdk-21/lib --add-modules javafx.controls,javafx.fxml -jar TMSE_Pizza.jar
 
 # Windows:
-java --module-path C:\javafx-sdk-17\lib --add-modules javafx.controls,javafx.fxml -jar TMSE_Pizza.jar
+java --module-path C:\javafx-sdk-21\lib --add-modules javafx.controls,javafx.fxml -jar TMSE_Pizza.jar
 ```
 
 ---
@@ -127,12 +127,12 @@ java --module-path C:\javafx-sdk-17\lib --add-modules javafx.controls,javafx.fxm
 
 **"Error: JavaFX runtime components are missing"**
 ```bash
-java --module-path ~/javafx-sdk-17/lib --add-modules javafx.controls,javafx.fxml -jar TMSE_Pizza.jar
+java --module-path ~/javafx-sdk-21/lib --add-modules javafx.controls,javafx.fxml -jar TMSE_Pizza.jar
 ```
 
 **"Cannot find module javafx.controls"**
 - Make sure JavaFX version matches your Java version
-- Verify JavaFX is extracted to `~/javafx-sdk-17` (macOS/Linux) or `C:\javafx-sdk-17` (Windows)
+- Verify JavaFX is extracted to `~/javafx-sdk-21` (macOS/Linux) or `C:\javafx-sdk-21` (Windows)
 - Check the path in the command above
 
 **"ClassNotFoundException"**

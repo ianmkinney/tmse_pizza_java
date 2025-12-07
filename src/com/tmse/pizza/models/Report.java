@@ -1,8 +1,6 @@
 package com.tmse.pizza.models;
 
-/**
- * Report class for system reports
- */
+// Report class for system reports
 public class Report {
     private String reportID;
     private String reportType;

@@ -4,9 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-/**
- * Menu data initialization
- */
+// Menu data initialization and management
 public class MenuData {
     private static List<Topping> toppings;
     private static List<Pizza> pizzas;

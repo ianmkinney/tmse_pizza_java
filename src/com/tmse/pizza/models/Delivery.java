@@ -1,8 +1,6 @@
 package com.tmse.pizza.models;
 
-/**
- * Delivery class matching system design specification
- */
+// Delivery class for delivery orders
 public class Delivery {
     private String deliveryID;
     private String orderID;

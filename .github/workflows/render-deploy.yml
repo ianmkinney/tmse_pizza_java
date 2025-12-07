@@ -1,0 +1,36 @@
+name: Deploy to Render.com
+
+on:
+  workflow_dispatch:
+    inputs:
+      render_service_id:
+        description: 'Render Service ID (optional)'
+        required: false
+  push:
+    branches: [ main, master ]
+    paths:
+      - 'Dockerfile'
+      - 'src/**'
+      - 'MANIFEST.MF'
+
+jobs:
+  deploy:
+    name: Trigger Render Deployment
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Notify Render Deployment
+      run: |
+        echo "Render.com supports automatic deployments from GitHub."
+        echo "Make sure your Render service is connected to this repository."
+        echo "Render will automatically deploy when changes are pushed to main/master branch."
+        echo ""
+        echo "To set up automatic deployments:"
+        echo "1. Go to https://dashboard.render.com"
+        echo "2. Select your service"
+        echo "3. Go to Settings → Build & Deploy"
+        echo "4. Enable 'Auto-Deploy' for main/master branch"
+

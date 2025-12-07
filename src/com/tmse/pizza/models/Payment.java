@@ -1,8 +1,6 @@
 package com.tmse.pizza.models;
 
-/**
- * Payment class matching system design specification
- */
+// Payment class for order payments
 public class Payment {
     private String paymentID;
     private String orderID;

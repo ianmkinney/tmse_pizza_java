@@ -1,8 +1,6 @@
 package com.tmse.pizza.models;
 
-/**
- * Pizza size enumeration
- */
+// Pizza size enumeration
 public enum PizzaSize {
     PERSONAL("Personal (8\")", 0.0),
     SMALL("Small (10\")", 2.0),

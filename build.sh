@@ -12,34 +12,32 @@ echo "Compiling Java source files..."
 
 # Try to find JavaFX
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-JAVAFX_17="$HOME/javafx-sdk-17/lib"
-JAVAFX_25_LOCAL="$SCRIPT_DIR/javafx-sdk-25.0.1/lib"
-JAVAFX_25_HOME="$HOME/Downloads/javafx-sdk-25.0.1/lib"
+JAVAFX_21="$HOME/javafx-sdk-21/lib"
+JAVAFX_21_LOCAL="$SCRIPT_DIR/javafx-sdk-21/lib"
+JAVAFX_21_DOWNLOADS="$HOME/Downloads/javafx-sdk-21/lib"
 
-if [ -d "$JAVAFX_17" ]; then
-    echo "Found JavaFX 17, compiling..."
+if [ -d "$JAVAFX_21" ]; then
+    echo "Found JavaFX 21, compiling..."
     javac -d build \
-        --module-path "$JAVAFX_17" \
+        --module-path "$JAVAFX_21" \
         --add-modules javafx.controls,javafx.fxml \
         src/com/tmse/pizza/models/*.java \
         src/com/tmse/pizza/storage/*.java \
         src/com/tmse/pizza/gui/*.java \
         src/com/tmse/pizza/*.java
-elif [ -d "$JAVAFX_25_LOCAL" ]; then
-    echo "Found JavaFX 25.0.1 in project directory, compiling..."
+elif [ -d "$JAVAFX_21_LOCAL" ]; then
+    echo "Found JavaFX 21 in project directory, compiling..."
     javac -d build \
-        --module-path "$JAVAFX_25_LOCAL" \
+        --module-path "$JAVAFX_21_LOCAL" \
         --add-modules javafx.controls,javafx.fxml \
         src/com/tmse/pizza/models/*.java \
         src/com/tmse/pizza/storage/*.java \
         src/com/tmse/pizza/gui/*.java \
         src/com/tmse/pizza/*.java
-elif [ -d "$JAVAFX_25_HOME" ]; then
-    echo "Found JavaFX 25.0.1 in Downloads..."
-    echo "WARNING: JavaFX 25 requires Java 23, but you have Java 17"
-    echo "Attempting to compile anyway (may fail)..."
+elif [ -d "$JAVAFX_21_DOWNLOADS" ]; then
+    echo "Found JavaFX 21 in Downloads, compiling..."
     javac -d build \
-        --module-path "$JAVAFX_25_HOME" \
+        --module-path "$JAVAFX_21_DOWNLOADS" \
         --add-modules javafx.controls,javafx.fxml \
         src/com/tmse/pizza/models/*.java \
         src/com/tmse/pizza/storage/*.java \
@@ -47,8 +45,7 @@ elif [ -d "$JAVAFX_25_HOME" ]; then
         src/com/tmse/pizza/*.java
 else
     echo "JavaFX not found!"
-    echo "Please download JavaFX 17 from https://openjfx.io/ and extract to ~/javafx-sdk-17"
-    echo "Or install Java 23 to use JavaFX 25.0.1"
+    echo "Please download JavaFX 21 from https://openjfx.io/ and extract to ~/javafx-sdk-21"
     exit 1
 fi
 

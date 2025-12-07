@@ -12,10 +12,7 @@ import javafx.stage.Stage;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Landing page - no login required
- * Shows Pizza/Specials/Drinks tabs matching hand-drawn design
- */
+// Landing page with Pizza/Specials/Drinks tabs - no login required
 public class LandingWindow {
     private Stage stage;
     private Order currentOrder;
@@ -71,7 +68,7 @@ public class LandingWindow {
         tabPane.getTabs().addAll(specialsTab, drinksTab, popularPizzasTab);
         root.setCenter(tabPane);
         
-        VBox footerBox = CommonLayout.createFooter();
+        VBox footerBox = CommonLayout.createFooter(stage, currentOrder, cartItems);
         root.setBottom(footerBox);
 
         Scene scene = new Scene(root);

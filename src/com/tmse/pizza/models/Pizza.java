@@ -3,9 +3,7 @@ package com.tmse.pizza.models;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Represents a pizza item
- */
+// Represents a pizza item
 public class Pizza {
     private String id;
     private String name;

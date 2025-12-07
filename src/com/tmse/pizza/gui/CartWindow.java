@@ -12,9 +12,7 @@ import javafx.stage.Stage;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Cart window matching hand-drawn design
- */
+// Cart window for viewing and managing order items
 public class CartWindow {
     private Stage stage;
     private Order currentOrder;
@@ -298,7 +296,7 @@ public class CartWindow {
         scrollPane.setFitToWidth(true);
         root.setCenter(scrollPane);
 
-        VBox footerBox = CommonLayout.createFooter();
+        VBox footerBox = CommonLayout.createFooter(stage, currentOrder, cartItems);
         root.setBottom(footerBox);
 
         Scene scene = new Scene(root);

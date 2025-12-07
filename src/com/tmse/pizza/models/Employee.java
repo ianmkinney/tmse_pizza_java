@@ -2,9 +2,7 @@ package com.tmse.pizza.models;
 
 import java.util.List;
 
-/**
- * Employee class matching system design specification
- */
+// Employee class for employee management
 public class Employee {
     private String employeeID;
     private String name;

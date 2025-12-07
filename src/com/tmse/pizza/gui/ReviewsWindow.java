@@ -13,9 +13,7 @@ import javafx.stage.Stage;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Reviews page matching hand-drawn design
- */
+// Reviews page
 public class ReviewsWindow {
     private Stage stage;
     private Order currentOrder;
@@ -127,7 +125,7 @@ public class ReviewsWindow {
         scrollPane.setFitToWidth(true);
         root.setCenter(scrollPane);
 
-        VBox footerBox = CommonLayout.createFooter();
+        VBox footerBox = CommonLayout.createFooter(stage, currentOrder, cartItems);
         root.setBottom(footerBox);
 
         Scene scene = new Scene(root);

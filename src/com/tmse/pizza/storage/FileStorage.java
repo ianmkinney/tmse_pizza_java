@@ -8,9 +8,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-/**
- * File-based storage system for users and orders
- */
+// File-based storage system for users and orders
 public class FileStorage {
     private static final String DATA_DIR = "data";
     private static final String USERS_FILE = DATA_DIR + "/users.txt";

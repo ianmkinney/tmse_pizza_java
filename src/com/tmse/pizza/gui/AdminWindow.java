@@ -18,10 +18,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
-/**
- * Admin Dashboard Window
- * Allows admin to view all orders, generate reports, manage users, and assign drivers
- */
+// Admin dashboard window for viewing orders, generating reports, managing users, and assigning drivers
 public class AdminWindow {
     private Stage stage;
     private User currentUser;
@@ -91,7 +88,7 @@ public class AdminWindow {
         root.setCenter(tabPane);
 
         // Footer
-        VBox footerBox = CommonLayout.createFooter();
+        VBox footerBox = CommonLayout.createFooter(stage, null, null);
         root.setBottom(footerBox);
 
         Scene scene = new Scene(root);
