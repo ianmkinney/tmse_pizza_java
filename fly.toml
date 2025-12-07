@@ -1,0 +1,60 @@
+# Fly.io configuration for TMSE Pizza JavaFX Application
+# This app uses VNC (port 5900) and noVNC web interface (port 6080)
+
+app = "tmse-pizza-java"
+primary_region = "iad"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  DISPLAY = ":99"
+  JAVA_OPTS = "-Xmx384m"
+  # VNC_PASSWORD can be set via fly secrets or env var
+
+[[services]]
+  protocol = "tcp"
+  internal_port = 6080
+  processes = ["app"]
+  
+  [services.concurrency]
+    hard_limit = 25
+    soft_limit = 20
+    type = "connections"
+
+  [[services.ports]]
+    port = 80
+    handlers = ["http"]
+    force_https = true
+
+  [[services.ports]]
+    port = 443
+    handlers = ["tls", "http"]
+
+  [[services.ports]]
+    port = 5900
+    handlers = ["tcp"]
+    
+  [[services.ports]]
+    port = 6080
+    handlers = ["http"]
+
+  [services.http_checks]
+    interval = "10s"
+    timeout = "2s"
+    grace_period = "5s"
+    method = "GET"
+    path = "/"
+    protocol = "http"
+    tls_skip_verify = false
+
+[deploy]
+  strategy = "immediate"
+
+# Memory configuration - Fly.io shared-cpu-1x has 256MB, shared-cpu-2x has 512MB
+# Using shared-cpu-2x for better performance (similar to Render's free tier)
+[vm]
+  cpu_kind = "shared"
+  cpus = 2
+  memory_mb = 512
+

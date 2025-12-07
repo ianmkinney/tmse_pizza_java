@@ -106,6 +106,42 @@ jobs:
           exit 1
         }
     
+    - name: Check Fly.io app configuration
+      run: |
+        if [ ! -f fly.toml ]; then
+          echo "::error::fly.toml file not found. Cannot deploy without Fly.io configuration."
+          exit 1
+        fi
+        
+        # Use app name from secret if provided, otherwise from fly.toml
+        if [ -n "${{ secrets.FLY_APP_NAME }}" ]; then
+          APP_NAME="${{ secrets.FLY_APP_NAME }}"
+          echo "Using app name from FLY_APP_NAME secret: $APP_NAME"
+          # Update fly.toml with the app name from secret
+          sed -i "s/^app = \".*\"/app = \"$APP_NAME\"/" fly.toml
+        else
+          # Extract app name from fly.toml
+          APP_NAME=$(grep '^app = ' fly.toml | sed 's/app = "\(.*\)"/\1/' | tr -d ' ')
+        fi
+        
+        if [ -z "$APP_NAME" ]; then
+          echo "::error::App name not found. Please either:"
+          echo "  1. Add 'app = \"your-app-name\"' to fly.toml, or"
+          echo "  2. Set FLY_APP_NAME secret in GitHub repository settings"
+          exit 1
+        fi
+        
+        echo "Fly.io app name: $APP_NAME"
+        echo "APP_NAME=$APP_NAME" >> $GITHUB_ENV
+        
+        # Check if app exists, if not provide instructions
+        if ! flyctl apps list 2>/dev/null | grep -q "$APP_NAME"; then
+          echo "::warning::App '$APP_NAME' does not exist on Fly.io yet."
+          echo "To create it, run locally: flyctl apps create $APP_NAME"
+          echo "Or update fly.toml with an existing app name."
+          echo "Attempting deployment anyway (flyctl will create the app if it has permissions)..."
+        fi
+    
     - name: Deploy to Fly.io
       run: |
         flyctl deploy --remote-only
