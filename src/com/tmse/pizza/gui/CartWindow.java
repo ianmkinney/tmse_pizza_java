@@ -1,6 +1,7 @@
 package com.tmse.pizza.gui;
 
 import com.tmse.pizza.models.*;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -30,10 +31,6 @@ public class CartWindow {
 
     public void show() {
         stage.setTitle("TMSE Pizza - Cart");
-        double currentWidth = stage.getWidth() > 0 ? stage.getWidth() : 1400;
-        double currentHeight = stage.getHeight() > 0 ? stage.getHeight() : 900;
-        stage.setWidth(currentWidth);
-        stage.setHeight(currentHeight);
         stage.setResizable(true);
 
         BorderPane root = new BorderPane();
@@ -237,7 +234,57 @@ public class CartWindow {
                 showAlert("Cart is empty!");
                 return;
             }
-            OrderDisplayWindow orderWindow = new OrderDisplayWindow(stage, currentOrder, null);
+            
+            // Set order type based on delivery method selection
+            if (deliveryRadio.isSelected()) {
+                currentOrder.setOrderType("delivery");
+                // Set delivery address if provided
+                if (!addressField.getText().trim().isEmpty()) {
+                    currentOrder.setDeliveryAddress(addressField.getText().trim());
+                } else {
+                    showAlert("Please enter a delivery address for delivery orders.");
+                    return;
+                }
+            } else {
+                currentOrder.setOrderType("pickup");
+            }
+            
+            // Set customer information
+            if (!nameField.getText().trim().isEmpty()) {
+                currentOrder.setCustomerName(nameField.getText().trim());
+            }
+            
+            // Set payment method
+            String paymentMethod = "Cash"; // Default
+            if (cardRadio.isSelected()) {
+                paymentMethod = "Credit/Debit Card";
+            } else if (paypalRadio.isSelected()) {
+                paymentMethod = "Paypal";
+            }
+            currentOrder.setPaymentMethod(paymentMethod);
+            
+            // Update order items and totals
+            currentOrder.getItems().clear();
+            for (OrderItem item : cartItems) {
+                currentOrder.addItem(item);
+            }
+            // Ensure totals are calculated (addItem should do this, but ensure it's done)
+            // Recalculate totals in case they weren't updated
+            double calculatedSubtotal = cartItems.stream().mapToDouble(OrderItem::getTotalPrice).sum();
+            double calculatedTax = calculatedSubtotal * 0.08;
+            double calculatedTotal = calculatedSubtotal + calculatedTax;
+            currentOrder.setSubtotal(calculatedSubtotal);
+            currentOrder.setTax(calculatedTax);
+            currentOrder.setTotalAmount(calculatedTotal);
+            
+            // Ensure order status is set to pending
+            currentOrder.setStatus("pending");
+            // Ensure order date is set
+            if (currentOrder.getOrderDate() == null) {
+                currentOrder.setOrderDate(new java.util.Date());
+            }
+            
+            OrderDisplayWindow orderWindow = new OrderDisplayWindow(stage, currentOrder, null, cartItems);
             orderWindow.show();
         });
 
@@ -257,6 +304,7 @@ public class CartWindow {
         Scene scene = new Scene(root);
         stage.setScene(scene);
         stage.show();
+        // Full screen is already set at startup, no need to toggle
     }
 
     private HBox createItemRow(OrderItem item, int index) {
@@ -279,10 +327,65 @@ public class CartWindow {
             details += " - " + item.getCrustType().getLabel();
         }
         
-        Label itemDetails = new Label(details);
-        itemDetails.setStyle("-fx-font-size: 12px; -fx-text-fill: #6b7280;");
+        // For "Build Your Own" pizzas, show all custom options
+        if ("Build Your Own".equals(item.getName()) && "pizza".equals(item.getType())) {
+            VBox customDetails = new VBox(3);
+            
+            if (item.getPizzaSize() != null) {
+                Label sizeLabel = new Label("Size: " + item.getPizzaSize().getLabel());
+                sizeLabel.setStyle("-fx-font-size: 11px; -fx-text-fill: #6b7280;");
+                customDetails.getChildren().add(sizeLabel);
+            }
+            
+            if (item.getCrustType() != null) {
+                Label crustLabel = new Label("Crust: " + item.getCrustType().getLabel());
+                crustLabel.setStyle("-fx-font-size: 11px; -fx-text-fill: #6b7280;");
+                customDetails.getChildren().add(crustLabel);
+            }
+            
+            if (item.getCheeseType() != null && !item.getCheeseType().isEmpty()) {
+                Label cheeseLabel = new Label("Cheese: " + item.getCheeseType());
+                cheeseLabel.setStyle("-fx-font-size: 11px; -fx-text-fill: #6b7280;");
+                customDetails.getChildren().add(cheeseLabel);
+            }
+            
+            if (item.getSauceType() != null && !item.getSauceType().isEmpty()) {
+                Label sauceLabel = new Label("Sauce: " + item.getSauceType());
+                sauceLabel.setStyle("-fx-font-size: 11px; -fx-text-fill: #6b7280;");
+                customDetails.getChildren().add(sauceLabel);
+            }
+            
+            if (item.getToppings() != null && !item.getToppings().isEmpty()) {
+                List<String> toppingNames = new ArrayList<>();
+                for (String toppingId : item.getToppings()) {
+                    Topping topping = MenuData.getToppingById(toppingId);
+                    if (topping != null) {
+                        toppingNames.add(topping.getName());
+                    } else {
+                        toppingNames.add(toppingId); // Fallback to ID if not found
+                    }
+                }
+                Label toppingsLabel = new Label("Toppings: " + String.join(", ", toppingNames));
+                toppingsLabel.setStyle("-fx-font-size: 11px; -fx-text-fill: #6b7280; -fx-wrap-text: true;");
+                toppingsLabel.setWrapText(true);
+                customDetails.getChildren().add(toppingsLabel);
+            }
+            
+            if (item.getSpecialInstructions() != null && !item.getSpecialInstructions().isEmpty()) {
+                Label instructionsLabel = new Label("Special Instructions: " + item.getSpecialInstructions());
+                instructionsLabel.setStyle("-fx-font-size: 11px; -fx-text-fill: #6b7280; -fx-wrap-text: true; -fx-font-style: italic;");
+                instructionsLabel.setWrapText(true);
+                customDetails.getChildren().add(instructionsLabel);
+            }
+            
+            itemInfo.getChildren().addAll(itemName, customDetails);
+        } else {
+            // For regular items, show simple details
+            Label itemDetails = new Label(details);
+            itemDetails.setStyle("-fx-font-size: 12px; -fx-text-fill: #6b7280;");
+            itemInfo.getChildren().addAll(itemName, itemDetails);
+        }
 
-        itemInfo.getChildren().addAll(itemName, itemDetails);
         HBox.setHgrow(itemInfo, Priority.ALWAYS);
 
         Spinner<Integer> quantitySpinner = new Spinner<>(1, 99, item.getQuantity());
@@ -296,6 +399,9 @@ public class CartWindow {
                 updatedItem.setCrustType(currentItem.getCrustType());
                 updatedItem.setToppings(currentItem.getToppings());
                 updatedItem.setBeverageSize(currentItem.getBeverageSize());
+                updatedItem.setCheeseType(currentItem.getCheeseType());
+                updatedItem.setSauceType(currentItem.getSauceType());
+                updatedItem.setSpecialInstructions(currentItem.getSpecialInstructions());
                 cartItems.set(finalIndex, updatedItem);
                 updateCart();
                 show();
@@ -334,6 +440,7 @@ public class CartWindow {
 
     private void showAlert(String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.initOwner(stage);
         alert.setTitle("Information");
         alert.setHeaderText(null);
         alert.setContentText(message);

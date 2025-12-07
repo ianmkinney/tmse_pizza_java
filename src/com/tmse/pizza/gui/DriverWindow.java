@@ -2,6 +2,8 @@ package com.tmse.pizza.gui;
 
 import com.tmse.pizza.models.*;
 import com.tmse.pizza.storage.FileStorage;
+import java.util.ArrayList;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -31,6 +33,8 @@ public class DriverWindow {
     private TableView<Order> availableOrdersTable;
     private TableView<Order> myDeliveriesTable;
     private TableView<FileStorage.TipRecord> tipsTable;
+    private Label activeLabel;
+    private Label completedLabel;
 
     public DriverWindow(Stage primaryStage, User user) {
         this.stage = primaryStage;
@@ -42,10 +46,6 @@ public class DriverWindow {
 
     public void show() {
         stage.setTitle("TMSE Pizza - Driver Dashboard");
-        double currentWidth = stage.getWidth() > 0 ? stage.getWidth() : 1400;
-        double currentHeight = stage.getHeight() > 0 ? stage.getHeight() : 900;
-        stage.setWidth(currentWidth);
-        stage.setHeight(currentHeight);
         stage.setResizable(true);
 
         BorderPane root = new BorderPane();
@@ -100,11 +100,13 @@ public class DriverWindow {
         Scene scene = new Scene(root);
         stage.setScene(scene);
         stage.show();
+        // Full screen is already set at startup, no need to toggle
 
         // Load data
         refreshAvailableOrders();
         refreshMyDeliveries();
         refreshTips();
+        refreshStats();
     }
 
     private VBox createAvailableOrdersTab() {
@@ -158,9 +160,16 @@ public class DriverWindow {
 
         TableColumn<Order, Void> actionsCol = new TableColumn<>("Actions");
         actionsCol.setCellFactory(param -> new TableCell<Order, Void>() {
+            private final Button viewDetailsButton = new Button("View Details");
             private final Button claimButton = new Button("Claim Order");
 
             {
+                viewDetailsButton.setStyle("-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-padding: 5 10;");
+                viewDetailsButton.setOnAction(e -> {
+                    Order order = getTableView().getItems().get(getIndex());
+                    showOrderDetails(order);
+                });
+                
                 claimButton.setStyle("-fx-background-color: #10b981; -fx-text-fill: white; -fx-padding: 5 10;");
                 claimButton.setOnAction(e -> {
                     Order order = getTableView().getItems().get(getIndex());
@@ -174,7 +183,9 @@ public class DriverWindow {
                 if (empty) {
                     setGraphic(null);
                 } else {
-                    setGraphic(claimButton);
+                    HBox box = new HBox(5);
+                    box.getChildren().addAll(viewDetailsButton, claimButton);
+                    setGraphic(box);
                 }
             }
         });
@@ -201,8 +212,8 @@ public class DriverWindow {
         HBox statsBox = new HBox(15);
         statsBox.setAlignment(Pos.CENTER_LEFT);
 
-        Label activeLabel = createStatCard("Active", "0", "#3b82f6");
-        Label completedLabel = createStatCard("Completed", "0", "#10b981");
+        activeLabel = createStatCard("Active", "0", "#3b82f6");
+        completedLabel = createStatCard("Completed", "0", "#10b981");
 
         statsBox.getChildren().addAll(activeLabel, completedLabel);
 
@@ -367,19 +378,72 @@ public class DriverWindow {
 
     private Label totalTipsLabel;
 
-    private void claimOrder(Order order) {
-        order.setAssignedDriverId(currentUser.getUsername());
-        order.setAssignedDriverName(currentUser.getUsername());
-        order.setStatus("out-for-delivery");
-        
-        try {
-            FileStorage.updateOrder(order);
-            showAlert("Order claimed successfully!");
-            refreshAvailableOrders();
-            refreshMyDeliveries();
-        } catch (IOException ex) {
-            showAlert("Error claiming order: " + ex.getMessage());
+    private void showOrderDetails(Order order) {
+        StringBuilder details = new StringBuilder();
+        details.append("Order Details\n");
+        details.append("=============\n\n");
+        details.append("Order #: ").append(order.getOrderId()).append("\n");
+        details.append("Customer: ").append(order.getCustomerName() != null ? order.getCustomerName() : order.getUsername()).append("\n");
+        details.append("Delivery Address: ").append(order.getDeliveryAddress() != null ? order.getDeliveryAddress() : "N/A").append("\n");
+        details.append("Status: ").append(order.getStatus()).append("\n");
+        details.append("Total: $").append(String.format("%.2f", order.getTotal())).append("\n\n");
+        details.append("Items:\n");
+        for (OrderItem item : order.getItems()) {
+            details.append("- ").append(item.getQuantity()).append("x ").append(item.getName());
+            if (item.getPizzaSize() != null) {
+                details.append(" (").append(item.getPizzaSize().getLabel()).append(")");
+            }
+            if (item.getCrustType() != null) {
+                details.append(" - ").append(item.getCrustType().getLabel());
+            }
+            if (item.getToppings() != null && !item.getToppings().isEmpty()) {
+                details.append(" - Toppings: ");
+                List<String> toppingNames = new ArrayList<>();
+                for (String toppingId : item.getToppings()) {
+                    Topping topping = MenuData.getToppingById(toppingId);
+                    if (topping != null) {
+                        toppingNames.add(topping.getName());
+                    }
+                }
+                details.append(String.join(", ", toppingNames));
+            }
+            details.append("\n");
         }
+        if (order.getSpecialInstructions() != null && !order.getSpecialInstructions().isEmpty()) {
+            details.append("\nSpecial Instructions: ").append(order.getSpecialInstructions()).append("\n");
+        }
+        
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Order Details");
+        alert.setHeaderText(null);
+        alert.setContentText(details.toString());
+        alert.showAndWait();
+    }
+
+    private void claimOrder(Order order) {
+        Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmAlert.setTitle("Claim Order");
+        confirmAlert.setHeaderText("Claim this order for delivery?");
+        confirmAlert.setContentText("Order #: " + order.getOrderId() + "\nCustomer: " + 
+            (order.getCustomerName() != null ? order.getCustomerName() : order.getUsername()) +
+            "\nAddress: " + (order.getDeliveryAddress() != null ? order.getDeliveryAddress() : "N/A"));
+        
+        confirmAlert.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.OK) {
+                order.setAssignedDriverId(currentUser.getUsername());
+                order.setAssignedDriverName(currentUser.getUsername());
+                order.setStatus("out-for-delivery");
+                
+                try {
+                    FileStorage.updateOrder(order);
+                    showAlert("Order claimed successfully!");
+                    refreshAvailableOrders();
+                    refreshMyDeliveries();
+                } catch (IOException ex) {
+                    showAlert("Error claiming order: " + ex.getMessage());
+                }
+            }
+        });
     }
 
     private void completeDelivery(Order order) {
@@ -410,6 +474,17 @@ public class DriverWindow {
         try {
             List<Order> available = FileStorage.getAvailableDeliveryOrders();
             availableOrdersList.setAll(available);
+            // Debug: Log how many orders were found
+            if (available.isEmpty()) {
+                // Try to see what orders exist
+                List<Order> allOrders = FileStorage.getAllOrders();
+                long readyDeliveryCount = allOrders.stream()
+                    .filter(o -> "delivery".equalsIgnoreCase(o.getOrderType()))
+                    .filter(o -> "ready".equalsIgnoreCase(o.getStatus()))
+                    .filter(o -> (o.getAssignedDriverId() == null || o.getAssignedDriverId().trim().isEmpty()))
+                    .count();
+                // Don't show alert, just silently refresh
+            }
         } catch (IOException ex) {
             showAlert("Error loading available orders: " + ex.getMessage());
         }
@@ -419,6 +494,7 @@ public class DriverWindow {
         try {
             List<Order> myOrders = FileStorage.getOrdersByDriver(currentUser.getUsername());
             myDeliveriesList.setAll(myOrders);
+            refreshStats();
         } catch (IOException ex) {
             showAlert("Error loading deliveries: " + ex.getMessage());
         }
@@ -435,14 +511,25 @@ public class DriverWindow {
 
     private void refreshStats() {
         long activeCount = myDeliveriesList.stream()
-            .filter(o -> "out-for-delivery".equals(o.getStatus()))
+            .filter(o -> {
+                String status = o.getStatus();
+                return status != null && ("out-for-delivery".equalsIgnoreCase(status) || "ready".equalsIgnoreCase(status));
+            })
             .count();
         long completedCount = myDeliveriesList.stream()
-            .filter(o -> "delivered".equals(o.getStatus()))
+            .filter(o -> {
+                String status = o.getStatus();
+                return status != null && "delivered".equalsIgnoreCase(status);
+            })
             .count();
         
-        // Update stats cards if they exist
-        // This would require storing references to the stat cards
+        // Update stats cards
+        if (activeLabel != null) {
+            activeLabel.setText("Active\n" + activeCount);
+        }
+        if (completedLabel != null) {
+            completedLabel.setText("Completed\n" + completedCount);
+        }
     }
 
     private void updateTotalTips() {
@@ -465,6 +552,7 @@ public class DriverWindow {
 
     private void showAlert(String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.initOwner(stage);
         alert.setTitle("Information");
         alert.setHeaderText(null);
         alert.setContentText(message);

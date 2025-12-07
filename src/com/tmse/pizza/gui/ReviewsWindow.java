@@ -2,6 +2,7 @@ package com.tmse.pizza.gui;
 
 import com.tmse.pizza.models.Order;
 import com.tmse.pizza.models.OrderItem;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -38,10 +39,6 @@ public class ReviewsWindow {
 
     public void show() {
         stage.setTitle("TMSE Pizza - Reviews");
-        double currentWidth = stage.getWidth() > 0 ? stage.getWidth() : 1400;
-        double currentHeight = stage.getHeight() > 0 ? stage.getHeight() : 900;
-        stage.setWidth(currentWidth);
-        stage.setHeight(currentHeight);
         stage.setResizable(true);
 
         BorderPane root = new BorderPane();
@@ -136,6 +133,7 @@ public class ReviewsWindow {
         Scene scene = new Scene(root);
         stage.setScene(scene);
         stage.show();
+        // Full screen is already set at startup, no need to toggle
     }
 
     private VBox createReviewBox(Review review) {

@@ -13,6 +13,8 @@ public class OrderItem {
     private List<String> toppings;
     private BeverageSize beverageSize;
     private String specialInstructions;
+    private String cheeseType;
+    private String sauceType;
     private int quantity;
     private double unitPrice;
     private double totalPrice;
@@ -37,6 +39,10 @@ public class OrderItem {
     public void setBeverageSize(BeverageSize beverageSize) { this.beverageSize = beverageSize; }
     public String getSpecialInstructions() { return specialInstructions; }
     public void setSpecialInstructions(String specialInstructions) { this.specialInstructions = specialInstructions; }
+    public String getCheeseType() { return cheeseType; }
+    public void setCheeseType(String cheeseType) { this.cheeseType = cheeseType; }
+    public String getSauceType() { return sauceType; }
+    public void setSauceType(String sauceType) { this.sauceType = sauceType; }
     public int getQuantity() { return quantity; }
     public double getUnitPrice() { return unitPrice; }
     public double getTotalPrice() { return totalPrice; }

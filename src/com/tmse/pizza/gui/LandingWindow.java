@@ -1,6 +1,7 @@
 package com.tmse.pizza.gui;
 
 import com.tmse.pizza.models.*;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -41,8 +42,6 @@ public class LandingWindow {
 
     public void show() {
         stage.setTitle("TMSE Pizza - Welcome");
-        stage.setWidth(1400);
-        stage.setHeight(900);
         stage.setResizable(true);
 
         BorderPane root = new BorderPane();
@@ -78,6 +77,7 @@ public class LandingWindow {
         Scene scene = new Scene(root);
         stage.setScene(scene);
         stage.show();
+        // Full screen is already set at startup, no need to toggle
     }
 
     private VBox createPizzaTab() {
@@ -458,6 +458,7 @@ public class LandingWindow {
 
     private void showAlert(String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.initOwner(stage);
         alert.setTitle("Information");
         alert.setHeaderText(null);
         alert.setContentText(message);

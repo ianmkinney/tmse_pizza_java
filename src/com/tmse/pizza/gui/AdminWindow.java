@@ -2,6 +2,7 @@ package com.tmse.pizza.gui;
 
 import com.tmse.pizza.models.*;
 import com.tmse.pizza.storage.FileStorage;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -28,6 +29,10 @@ public class AdminWindow {
     private ObservableList<User> usersList;
     private TableView<Order> ordersTable;
     private TableView<User> usersTable;
+    private Label revenueLabel;
+    private Label pendingLabel;
+    private Label preparingLabel;
+    private Label readyLabel;
 
     public AdminWindow(Stage primaryStage, User user) {
         this.stage = primaryStage;
@@ -38,10 +43,6 @@ public class AdminWindow {
 
     public void show() {
         stage.setTitle("TMSE Pizza - Admin Dashboard");
-        double currentWidth = stage.getWidth() > 0 ? stage.getWidth() : 1400;
-        double currentHeight = stage.getHeight() > 0 ? stage.getHeight() : 900;
-        stage.setWidth(currentWidth);
-        stage.setHeight(currentHeight);
         stage.setResizable(true);
 
         BorderPane root = new BorderPane();
@@ -96,10 +97,12 @@ public class AdminWindow {
         Scene scene = new Scene(root);
         stage.setScene(scene);
         stage.show();
+        // Full screen is already set at startup, no need to toggle
 
         // Load data
         refreshOrders();
         refreshUsers();
+        updateStats();
     }
 
     private VBox createOrdersTab() {
@@ -110,10 +113,10 @@ public class AdminWindow {
         HBox statsBox = new HBox(15);
         statsBox.setAlignment(Pos.CENTER_LEFT);
 
-        Label pendingLabel = createStatCard("Pending", "0", "#fbbf24");
-        Label preparingLabel = createStatCard("Preparing", "0", "#3b82f6");
-        Label readyLabel = createStatCard("Ready", "0", "#10b981");
-        Label revenueLabel = createStatCard("Today's Revenue", "$0.00", "#dc2626");
+        pendingLabel = createStatCard("Pending", "0", "#fbbf24");
+        preparingLabel = createStatCard("Preparing", "0", "#3b82f6");
+        readyLabel = createStatCard("Ready", "0", "#10b981");
+        revenueLabel = createStatCard("Today's Revenue", "$0.00", "#dc2626");
 
         statsBox.getChildren().addAll(pendingLabel, preparingLabel, readyLabel, revenueLabel);
 
@@ -359,6 +362,10 @@ public class AdminWindow {
         salesReportButton.setStyle("-fx-background-color: #dc2626; -fx-text-fill: white; -fx-padding: 10 20; -fx-font-size: 14px;");
         salesReportButton.setOnAction(e -> generateSalesReport());
 
+        Button resetSalesButton = new Button("Reset Sales for Today");
+        resetSalesButton.setStyle("-fx-background-color: #ef4444; -fx-text-fill: white; -fx-padding: 10 20; -fx-font-size: 14px; -fx-font-weight: bold;");
+        resetSalesButton.setOnAction(e -> resetSalesForToday());
+
         TextArea reportArea = new TextArea();
         reportArea.setEditable(false);
         reportArea.setPrefRowCount(20);
@@ -368,7 +375,7 @@ public class AdminWindow {
         scrollPane.setFitToWidth(true);
         scrollPane.setFitToHeight(true);
 
-        vbox.getChildren().addAll(titleLabel, dailyReportButton, salesReportButton, scrollPane);
+        vbox.getChildren().addAll(titleLabel, dailyReportButton, salesReportButton, resetSalesButton, scrollPane);
         
         // Store reference to report area for updates
         this.reportArea = reportArea;
@@ -382,15 +389,25 @@ public class AdminWindow {
         try {
             List<Order> allOrders = FileStorage.getAllOrders();
             Date today = new Date();
-            SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
-            String todayStr = dateFormat.format(today);
-
+            java.util.Calendar todayCal = java.util.Calendar.getInstance();
+            todayCal.setTime(today);
+            int todayYear = todayCal.get(java.util.Calendar.YEAR);
+            int todayMonth = todayCal.get(java.util.Calendar.MONTH);
+            int todayDay = todayCal.get(java.util.Calendar.DAY_OF_MONTH);
+            
             List<Order> todayOrders = allOrders.stream()
                 .filter(o -> {
                     if (o.getOrderDate() == null) return false;
-                    return dateFormat.format(o.getOrderDate()).equals(todayStr);
+                    java.util.Calendar orderCal = java.util.Calendar.getInstance();
+                    orderCal.setTime(o.getOrderDate());
+                    return orderCal.get(java.util.Calendar.YEAR) == todayYear &&
+                           orderCal.get(java.util.Calendar.MONTH) == todayMonth &&
+                           orderCal.get(java.util.Calendar.DAY_OF_MONTH) == todayDay;
                 })
                 .collect(Collectors.toList());
+            
+            SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
+            String todayStr = dateFormat.format(today);
 
             int totalOrders = todayOrders.size();
             double totalSales = todayOrders.stream()
@@ -503,6 +520,58 @@ public class AdminWindow {
         }
     }
 
+    private void resetSalesForToday() {
+        Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmAlert.setTitle("Reset Sales");
+        confirmAlert.setHeaderText("Reset Sales for Today");
+        confirmAlert.setContentText("This will delete all orders from today. This action cannot be undone.\n\nAre you sure you want to continue?");
+        
+        confirmAlert.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.OK) {
+                try {
+                    List<Order> allOrders = FileStorage.getAllOrders();
+                    Date today = new Date();
+                    java.util.Calendar todayCal = java.util.Calendar.getInstance();
+                    todayCal.setTime(today);
+                    int todayYear = todayCal.get(java.util.Calendar.YEAR);
+                    int todayMonth = todayCal.get(java.util.Calendar.MONTH);
+                    int todayDay = todayCal.get(java.util.Calendar.DAY_OF_MONTH);
+                    
+                    // Filter out today's orders
+                    List<Order> ordersToKeep = allOrders.stream()
+                        .filter(o -> {
+                            if (o.getOrderDate() == null) return true;
+                            java.util.Calendar orderCal = java.util.Calendar.getInstance();
+                            orderCal.setTime(o.getOrderDate());
+                            return !(orderCal.get(java.util.Calendar.YEAR) == todayYear &&
+                                   orderCal.get(java.util.Calendar.MONTH) == todayMonth &&
+                                   orderCal.get(java.util.Calendar.DAY_OF_MONTH) == todayDay);
+                        })
+                        .collect(Collectors.toList());
+                    
+                    // Delete all orders and re-save only the ones to keep
+                    java.io.File ordersFile = new java.io.File("data/orders.txt");
+                    if (ordersFile.exists()) {
+                        ordersFile.delete();
+                    }
+                    
+                    // Re-save all orders except today's
+                    for (Order order : ordersToKeep) {
+                        FileStorage.saveOrder(order);
+                    }
+                    
+                    showAlert("Sales for today have been reset successfully!");
+                    refreshOrders();
+                    if (reportArea != null) {
+                        reportArea.clear();
+                    }
+                } catch (IOException ex) {
+                    showAlert("Error resetting sales: " + ex.getMessage());
+                }
+            }
+        });
+    }
+
     private Label createStatCard(String label, String value, String color) {
         Label card = new Label(label + "\n" + value);
         card.setStyle("-fx-background-color: " + color + "; -fx-text-fill: white; -fx-padding: 15 20; " +
@@ -543,8 +612,63 @@ public class AdminWindow {
         try {
             List<Order> allOrders = FileStorage.getAllOrders();
             ordersList.setAll(allOrders);
+            updateStats();
         } catch (IOException ex) {
             showAlert("Error loading orders: " + ex.getMessage());
+        }
+    }
+    
+    private void updateStats() {
+        try {
+            List<Order> allOrders = FileStorage.getAllOrders();
+            
+            // Count orders by status
+            long pendingCount = allOrders.stream()
+                .filter(o -> "pending".equalsIgnoreCase(o.getStatus()))
+                .count();
+            long preparingCount = allOrders.stream()
+                .filter(o -> "preparing".equalsIgnoreCase(o.getStatus()))
+                .count();
+            long readyCount = allOrders.stream()
+                .filter(o -> "ready".equalsIgnoreCase(o.getStatus()))
+                .count();
+            
+            // Calculate today's revenue
+            Date today = new Date();
+            java.util.Calendar todayCal = java.util.Calendar.getInstance();
+            todayCal.setTime(today);
+            int todayYear = todayCal.get(java.util.Calendar.YEAR);
+            int todayMonth = todayCal.get(java.util.Calendar.MONTH);
+            int todayDay = todayCal.get(java.util.Calendar.DAY_OF_MONTH);
+            
+            double todayRevenue = allOrders.stream()
+                .filter(o -> {
+                    if (o.getOrderDate() == null) return false;
+                    java.util.Calendar orderCal = java.util.Calendar.getInstance();
+                    orderCal.setTime(o.getOrderDate());
+                    return orderCal.get(java.util.Calendar.YEAR) == todayYear &&
+                           orderCal.get(java.util.Calendar.MONTH) == todayMonth &&
+                           orderCal.get(java.util.Calendar.DAY_OF_MONTH) == todayDay;
+                })
+                .filter(o -> !"cancelled".equalsIgnoreCase(o.getStatus()))
+                .mapToDouble(Order::getTotal)
+                .sum();
+            
+            // Update stat cards
+            if (pendingLabel != null) {
+                pendingLabel.setText("Pending\n" + pendingCount);
+            }
+            if (preparingLabel != null) {
+                preparingLabel.setText("Preparing\n" + preparingCount);
+            }
+            if (readyLabel != null) {
+                readyLabel.setText("Ready\n" + readyCount);
+            }
+            if (revenueLabel != null) {
+                revenueLabel.setText("Today's Revenue\n$" + String.format("%.2f", todayRevenue));
+            }
+        } catch (IOException ex) {
+            showAlert("Error updating stats: " + ex.getMessage());
         }
     }
 
@@ -559,6 +683,7 @@ public class AdminWindow {
 
     private void showAlert(String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.initOwner(stage);
         alert.setTitle("Information");
         alert.setHeaderText(null);
         alert.setContentText(message);

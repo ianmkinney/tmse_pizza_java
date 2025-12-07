@@ -2,6 +2,7 @@ package com.tmse.pizza.gui;
 
 import com.tmse.pizza.models.*;
 import javafx.animation.*;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -42,10 +43,6 @@ public class PizzaBuilderWindow {
 
     public void show() {
         stage.setTitle("TMSE Pizza - Custom Pizza Builder");
-        double currentWidth = stage.getWidth() > 0 ? stage.getWidth() : 1400;
-        double currentHeight = stage.getHeight() > 0 ? stage.getHeight() : 900;
-        stage.setWidth(currentWidth);
-        stage.setHeight(currentHeight);
         stage.setResizable(true);
 
         BorderPane root = new BorderPane();
@@ -78,6 +75,7 @@ public class PizzaBuilderWindow {
         Scene scene = new Scene(root);
         stage.setScene(scene);
         stage.show();
+        // Full screen is already set at startup, no need to toggle
     }
 
     private VBox createLeftPanel() {
@@ -227,6 +225,8 @@ public class PizzaBuilderWindow {
             item.setPizzaSize(selectedSize);
             item.setCrustType(selectedCrust);
             item.setToppings(new ArrayList<>(selectedToppings));
+            item.setCheeseType(selectedCheese);
+            item.setSauceType(selectedSauce);
             if (!instructionsField.getText().trim().isEmpty()) {
                 item.setSpecialInstructions(instructionsField.getText().trim());
             }
@@ -264,7 +264,7 @@ public class PizzaBuilderWindow {
         vbox.setPrefWidth(400);
         vbox.setAlignment(Pos.CENTER);
 
-        Label previewLabel = new Label("Select details below, see your pizza preview!");
+        Label previewLabel = new Label("Select details to your left, see your pizza preview!");
         previewLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #1f2937; " +
                 "-fx-border-color: #dc2626; -fx-border-width: 4; -fx-background-color: #fef3c7; " +
                 "-fx-padding: 15; -fx-background-radius: 5; -fx-border-radius: 5; -fx-text-alignment: center;");
@@ -573,6 +573,7 @@ public class PizzaBuilderWindow {
 
     private void showAlert(String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.initOwner(stage);
         alert.setTitle("Information");
         alert.setHeaderText(null);
         alert.setContentText(message);

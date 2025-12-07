@@ -2,6 +2,7 @@ package com.tmse.pizza.gui;
 
 import com.tmse.pizza.models.*;
 import com.tmse.pizza.storage.FileStorage;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -10,6 +11,8 @@ import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Order display window showing order details and totals
@@ -18,46 +21,58 @@ public class OrderDisplayWindow {
     private Stage stage;
     private Order order;
     private User user;
+    private List<OrderItem> cartItems;
 
     public OrderDisplayWindow(Stage parentStage, Order order, User user) {
-        this.stage = new Stage();
+        this.stage = parentStage; // Use the same stage instead of creating a new popup
         this.order = order;
         this.user = user;
-        this.stage.initOwner(parentStage);
+        this.cartItems = new ArrayList<>();
+    }
+    
+    public OrderDisplayWindow(Stage parentStage, Order order, User user, List<OrderItem> cartItems) {
+        this.stage = parentStage; // Use the same stage instead of creating a new popup
+        this.order = order;
+        this.user = user;
+        this.cartItems = cartItems != null ? new ArrayList<>(cartItems) : new ArrayList<>();
     }
 
     public void show() {
-        stage.setTitle("Order Summary - TMSE Pizza");
-        Stage parentStage = (Stage) stage.getOwner();
-        if (parentStage != null) {
-            double currentWidth = parentStage.getWidth() > 0 ? parentStage.getWidth() : 1400;
-            double currentHeight = parentStage.getHeight() > 0 ? parentStage.getHeight() : 900;
-            stage.setWidth(currentWidth);
-            stage.setHeight(currentHeight);
-        } else {
-            stage.setWidth(1400);
-            stage.setHeight(900);
+        // Validate order
+        if (order == null) {
+            showAlert("Error: Order is null");
+            return;
         }
+        
+        if (order.getItems() == null || order.getItems().isEmpty()) {
+            showAlert("Error: Order has no items");
+            return;
+        }
+        
+        stage.setTitle("Order Summary - TMSE Pizza");
         stage.setResizable(true);
 
-        VBox root = new VBox(15);
-        root.setPadding(new Insets(30));
+        BorderPane root = new BorderPane();
         root.setStyle("-fx-background-color: #ffffff;");
+        
+        VBox centerBox = new VBox(15);
+        centerBox.setPadding(new Insets(30));
+        centerBox.setStyle("-fx-background-color: #ffffff;");
 
         Label titleLabel = new Label("Order Summary");
         titleLabel.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
-        root.getChildren().add(titleLabel);
+        centerBox.getChildren().add(titleLabel);
 
-        Label orderIdLabel = new Label("Order ID: " + order.getOrderId());
+        Label orderIdLabel = new Label("Order ID: " + (order.getOrderId() != null ? order.getOrderId() : "N/A"));
         orderIdLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #666;");
-        root.getChildren().add(orderIdLabel);
+        centerBox.getChildren().add(orderIdLabel);
 
         Separator separator1 = new Separator();
-        root.getChildren().add(separator1);
+        centerBox.getChildren().add(separator1);
 
         Label itemsLabel = new Label("Items Ordered:");
         itemsLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
-        root.getChildren().add(itemsLabel);
+        centerBox.getChildren().add(itemsLabel);
 
         VBox itemsBox = new VBox(10);
         for (OrderItem item : order.getItems()) {
@@ -76,13 +91,19 @@ public class OrderDisplayWindow {
             }
             if (item.getToppings() != null && !item.getToppings().isEmpty()) {
                 itemDetails += " - Toppings: ";
+                StringBuilder toppingsList = new StringBuilder();
                 for (String toppingId : item.getToppings()) {
                     Topping topping = MenuData.getToppingById(toppingId);
                     if (topping != null) {
-                        itemDetails += topping.getName() + ", ";
+                        if (toppingsList.length() > 0) {
+                            toppingsList.append(", ");
+                        }
+                        toppingsList.append(topping.getName());
                     }
                 }
-                itemDetails = itemDetails.substring(0, itemDetails.length() - 2);
+                if (toppingsList.length() > 0) {
+                    itemDetails += toppingsList.toString();
+                }
             }
 
             Label itemLabel = new Label(itemDetails);
@@ -99,10 +120,10 @@ public class OrderDisplayWindow {
         ScrollPane scrollPane = new ScrollPane(itemsBox);
         scrollPane.setFitToWidth(true);
         scrollPane.setPrefHeight(250);
-        root.getChildren().add(scrollPane);
+        centerBox.getChildren().add(scrollPane);
 
         Separator separator2 = new Separator();
-        root.getChildren().add(separator2);
+        centerBox.getChildren().add(separator2);
 
         VBox totalsBox = new VBox(10);
         totalsBox.setPadding(new Insets(10));
@@ -133,7 +154,7 @@ public class OrderDisplayWindow {
         totalBox.getChildren().addAll(totalLabel, totalValue);
 
         totalsBox.getChildren().addAll(subtotalBox, taxBox, separator3, totalBox);
-        root.getChildren().add(totalsBox);
+        centerBox.getChildren().add(totalsBox);
 
         HBox buttonBox = new HBox(15);
         buttonBox.setAlignment(Pos.CENTER);
@@ -143,27 +164,60 @@ public class OrderDisplayWindow {
         confirmButton.setStyle("-fx-background-color: #dc2626; -fx-text-fill: white; -fx-padding: 10 30; -fx-font-size: 14px;");
         confirmButton.setOnAction(e -> {
             try {
+                // Ensure order status is set to pending
+                order.setStatus("pending");
+                // Ensure order date is set
+                if (order.getOrderDate() == null) {
+                    order.setOrderDate(new java.util.Date());
+                }
+                // Save the order
                 FileStorage.saveOrder(order);
-                showAlert("Order confirmed! Order ID: " + order.getOrderId());
-                stage.close();
+                
+                // Clear cart and navigate back to landing page
+                LandingWindow landingWindow = new LandingWindow(stage, new Order("ORD-" + System.currentTimeMillis(), "guest"), new ArrayList<>());
+                landingWindow.show();
             } catch (IOException ex) {
                 showAlert("Error saving order: " + ex.getMessage());
             }
         });
 
-        Button cancelButton = new Button("Cancel");
-        cancelButton.setOnAction(e -> stage.close());
+        Button backButton = new Button("Back");
+        backButton.setStyle("-fx-background-color: #6b7280; -fx-text-fill: white; -fx-padding: 10 30; -fx-font-size: 14px;");
+        backButton.setOnAction(e -> {
+            // Navigate back to landing page
+            LandingWindow landingWindow = new LandingWindow(stage, order, cartItems);
+            landingWindow.show();
+        });
 
-        buttonBox.getChildren().addAll(confirmButton, cancelButton);
-        root.getChildren().add(buttonBox);
+        buttonBox.getChildren().addAll(backButton, confirmButton);
+        centerBox.getChildren().add(buttonBox);
+        
+        // Wrap centerBox in ScrollPane for proper scrolling
+        ScrollPane mainScroll = new ScrollPane(centerBox);
+        mainScroll.setFitToWidth(true);
+        mainScroll.setStyle("-fx-background-color: #ffffff;");
+        root.setCenter(mainScroll);
+        
+        // Add header and footer for consistency
+        CommonLayout.HeaderInfo headerInfo = CommonLayout.createHeader(stage, order, order.getItems(), () -> {
+            // Navigate back to landing page when home is clicked
+            LandingWindow landingWindow = new LandingWindow(stage, order, cartItems);
+            landingWindow.show();
+        }, "order");
+        root.setTop(headerInfo.getHeaderContainer());
+        
+        VBox footerBox = CommonLayout.createFooter();
+        root.setBottom(footerBox);
 
         Scene scene = new Scene(root);
         stage.setScene(scene);
         stage.show();
+        // Full screen is already set at startup, no need to toggle
     }
 
     private void showAlert(String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.initOwner(stage);
         alert.setTitle("Information");
         alert.setHeaderText(null);
         alert.setContentText(message);

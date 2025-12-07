@@ -209,15 +209,30 @@ public class FileStorage {
         try (BufferedReader br = new BufferedReader(new FileReader(file))) {
             String line;
             while ((line = br.readLine()) != null) {
+                if (line.trim().isEmpty()) continue;
                 String[] parts = line.split("\\|");
-                if (parts.length > 8 && "delivery".equals(parts[8])) {
-                    // Only include orders that are ready and not yet assigned
-                    if (parts.length > 6) {
-                        String status = parts[6].toLowerCase();
-                        if ("ready".equals(status) || "preparing".equals(status)) {
-                            if (parts.length <= 10 || parts[10].isEmpty()) {
-                                Order order = parseOrderFromLine(parts);
-                                orders.add(order);
+                // Check if it's a delivery order
+                if (parts.length > 8) {
+                    String orderType = parts[8].trim().toLowerCase();
+                    if ("delivery".equals(orderType)) {
+                        // Only include orders that are ready and not yet assigned
+                        if (parts.length > 6) {
+                            String status = parts[6].trim().toLowerCase();
+                            if ("ready".equals(status)) {
+                                // Check if driver is not assigned (index 10 is assignedDriverId)
+                                String driverId = (parts.length > 10) ? parts[10].trim() : "";
+                                if (driverId.isEmpty()) {
+                                    Order order = parseOrderFromLine(parts);
+                                    if (order != null) {
+                                        // Double-check the parsed order's status and type
+                                        String parsedStatus = order.getStatus() != null ? order.getStatus().trim().toLowerCase() : "";
+                                        String parsedType = order.getOrderType() != null ? order.getOrderType().trim().toLowerCase() : "";
+                                        String parsedDriverId = order.getAssignedDriverId() != null ? order.getAssignedDriverId().trim() : "";
+                                        if ("ready".equals(parsedStatus) && "delivery".equals(parsedType) && parsedDriverId.isEmpty()) {
+                                            orders.add(order);
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
