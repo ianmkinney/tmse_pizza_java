@@ -62,8 +62,13 @@ ENV DISPLAY=:99
 
 # Create startup script
 RUN echo '#!/bin/bash\n\
-Xvfb :99 -screen 0 1024x768x24 &\n\
+set -e\n\
+# Start Xvfb in background\n\
+Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &\n\
+# Wait for Xvfb to be ready\n\
+sleep 2\n\
 export DISPLAY=:99\n\
+# Run the Java application\n\
 java --module-path ./javafx-sdk/lib --add-modules javafx.controls,javafx.fxml -jar TMSE_Pizza.jar\n\
 ' > /app/start.sh && chmod +x /app/start.sh
 
