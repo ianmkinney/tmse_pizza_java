@@ -375,6 +375,10 @@ public class LandingWindow {
                             toppingCircle.setFill(javafx.scene.paint.Color.rgb(220, 38, 38));
                         } else if (toppingId.equals("onions")) {
                             toppingCircle.setFill(javafx.scene.paint.Color.rgb(233, 213, 255));
+                        } else if (toppingId.equals("pineapple")) {
+                            toppingCircle.setFill(javafx.scene.paint.Color.rgb(255, 255, 0)); // Yellow for pineapple
+                        } else if (toppingId.equals("ham")) {
+                            toppingCircle.setFill(javafx.scene.paint.Color.rgb(255, 200, 180)); // Pink/light red for ham
                         } else {
                             toppingCircle.setFill(javafx.scene.paint.Color.rgb(100, 100, 100));
                         }

@@ -3,7 +3,7 @@
 # Creates a folder with launcher, JAR, and instructions
 
 echo "=========================================="
-echo "TMSE Pizza - macOS Package Creator"
+echo "TMSE Pizza : macOS Package Creator"
 echo "=========================================="
 echo ""
 
@@ -31,7 +31,7 @@ chmod +x "$DIST_DIR/TMSE_Pizza.command"
 
 # Create a simple README
 cat > "$DIST_DIR/README.txt" << 'EOF'
-TMSE Pizza - macOS Installation Guide
+TMSE Pizza : macOS Installation Guide
 ======================================
 
 QUICK START:

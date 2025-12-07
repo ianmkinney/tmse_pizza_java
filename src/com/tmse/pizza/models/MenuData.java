@@ -25,7 +25,8 @@ public class MenuData {
             new Topping("bell-peppers", "Bell Peppers", 1.00),
             new Topping("olives", "Black Olives", 1.25),
             new Topping("bacon", "Crispy Bacon", 1.75),
-            new Topping("extra-cheese", "Extra Cheese", 1.50)
+            new Topping("pineapple", "Pineapple", 1.25),
+            new Topping("ham", "Ham", 1.50)
         );
     }
 
@@ -33,7 +34,7 @@ public class MenuData {
         pizzas = Arrays.asList(
             new Pizza("cowabunga-classic", "Cowabunga Classic",
                 "The ultimate TMSE classic with crispy pepperoni and melty mozzarella",
-                8.99, Arrays.asList("pepperoni", "extra-cheese")),
+                8.99, Arrays.asList("pepperoni")),
             new Pizza("shredder-supreme", "Shredder Supreme",
                 "A villainously loaded feast stacked with sausage, mushroom and green peppers",
                 11.99, Arrays.asList("sausage", "mushrooms", "bell-peppers")),
@@ -45,7 +46,7 @@ public class MenuData {
                 11.99, Arrays.asList("bacon", "onions")),
             new Pizza("splinters-wisdom", "Splinter's Wisdom",
                 "A masterful blend of simplicity with alfredo base topped with ricotta, mozzarella and a hint of parmesan",
-                8.99, Arrays.asList("extra-cheese")),
+                8.99, new ArrayList<>()),
             new Pizza("build-your-own", "Build Your Own",
                 "Start with our classic cheese and add up to 4 toppings of your choice",
                 7.99, new ArrayList<>())

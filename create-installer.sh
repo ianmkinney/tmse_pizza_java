@@ -57,9 +57,9 @@ else
     echo "ERROR: Failed to create installer"
     echo ""
     echo "Note: jpackage requires:"
-    echo "  - Java 21+ with jpackage tool"
-    echo "  - For .exe: Inno Setup 6+ (https://jrsoftware.org/isdl.php)"
-    echo "  - For .msi: WiX Toolset 3.11+ (https://wixtoolset.org/)"
+    echo "  : Java 21+ with jpackage tool"
+    echo "  : For .exe: Inno Setup 6+ (https://jrsoftware.org/isdl.php)"
+    echo "  : For .msi: WiX Toolset 3.11+ (https://wixtoolset.org/)"
     exit 1
 fi
 

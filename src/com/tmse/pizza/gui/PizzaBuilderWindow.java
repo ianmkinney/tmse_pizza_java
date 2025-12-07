@@ -136,7 +136,7 @@ public class PizzaBuilderWindow {
         cheeseLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
         
         ComboBox<String> cheeseCombo = new ComboBox<>();
-        cheeseCombo.getItems().addAll("Mozzarella", "Extra Cheese");
+        cheeseCombo.getItems().addAll("Mozzarella", "Provolone", "Cheddar", "Parmesan");
         cheeseCombo.setValue("Mozzarella");
         cheeseCombo.setOnAction(e -> {
             selectedCheese = cheeseCombo.getValue();
@@ -349,9 +349,15 @@ public class PizzaBuilderWindow {
         // Set cheese color based on selection
         Color cheeseColor;
         Color cheeseStrokeColor;
-        if ("Extra Cheese".equals(selectedCheese)) {
-            cheeseColor = Color.rgb(255, 235, 150); // Richer yellow for extra cheese
-            cheeseStrokeColor = Color.rgb(255, 200, 50);
+        if ("Provolone".equals(selectedCheese)) {
+            cheeseColor = Color.rgb(255, 245, 180); // Lighter yellow for provolone
+            cheeseStrokeColor = Color.rgb(255, 220, 100);
+        } else if ("Cheddar".equals(selectedCheese)) {
+            cheeseColor = Color.rgb(255, 200, 50); // Orange-yellow for cheddar
+            cheeseStrokeColor = Color.rgb(255, 180, 30);
+        } else if ("Parmesan".equals(selectedCheese)) {
+            cheeseColor = Color.rgb(250, 240, 190); // Pale yellow for parmesan
+            cheeseStrokeColor = Color.rgb(240, 220, 150);
         } else { // Mozzarella (default)
             cheeseColor = Color.rgb(254, 243, 199); // Light cream for mozzarella
             cheeseStrokeColor = Color.rgb(251, 191, 36);
@@ -445,6 +451,10 @@ public class PizzaBuilderWindow {
                             toppingCircle.setFill(Color.rgb(220, 38, 38));
                         } else if (toppingId.equals("onions")) {
                             toppingCircle.setFill(Color.rgb(233, 213, 255));
+                        } else if (toppingId.equals("pineapple")) {
+                            toppingCircle.setFill(Color.rgb(255, 255, 0)); // Yellow for pineapple
+                        } else if (toppingId.equals("ham")) {
+                            toppingCircle.setFill(Color.rgb(255, 200, 180)); // Pink/light red for ham
                         } else {
                             toppingCircle.setFill(Color.rgb(100, 100, 100));
                         }
